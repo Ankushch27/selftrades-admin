@@ -154,7 +154,7 @@ const AddCouponModal = () => {
                   name="discount"
                   type="number"
                   as={TextField}
-                  label="Discount %"
+                  label="Cost %"
                 />
                 <Field
                   error={values.errors.module ? true : false}

@@ -14,6 +14,7 @@ import GetAppIcon from '@material-ui/icons/GetApp';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
+import { CSVLink } from 'react-csv';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -42,13 +43,13 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-  { id: 'timestamp', label: 'Timestamp' },
-  { id: 'username', label: 'Username' },
-  { id: 'email', label: 'Email' },
-  { id: 'mobile', label: 'Mobile' },
-  { id: 'module', label: 'Module' },
-  { id: 'expiry', label: 'Expiry' },
-  { id: 'amount', label: 'Amount' },
+  { key: 'timestamp', label: 'Timestamp' },
+  { key: 'username', label: 'Username' },
+  { key: 'email', label: 'Email' },
+  { key: 'mobile', label: 'Mobile' },
+  { key: 'module', label: 'Module' },
+  { key: 'expiry', label: 'Expiry' },
+  { key: 'amount', label: 'Amount' },
 ];
 
 function EnhancedTableHead(props) {
@@ -62,14 +63,14 @@ function EnhancedTableHead(props) {
       <TableRow>
         {headCells.map((headCell) => (
           <TableCell
-            key={headCell.id}
-            sortDirection={orderBy === headCell.id ? order : false}>
+            key={headCell.key}
+            sortDirection={orderBy === headCell.key ? order : false}>
             <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : 'asc'}
-              onClick={createSortHandler(headCell.id)}>
+              active={orderBy === headCell.key}
+              direction={orderBy === headCell.key ? order : 'asc'}
+              onClick={createSortHandler(headCell.key)}>
               {headCell.label}
-              {orderBy === headCell.id ? (
+              {orderBy === headCell.key ? (
                 <span className={classes.visuallyHidden}>
                   {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
                 </span>
@@ -115,12 +116,12 @@ const useStyles = makeStyles((theme) => ({
 
 export default function UserDetails() {
   const classes = useStyles();
-  const [userDetails, setUserDetails] = useState([])
+  const [userDetails, setUserDetails] = useState([]);
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('timestamp');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -160,12 +161,11 @@ export default function UserDetails() {
           <Typography variant="h5" component="div">
             User Details
           </Typography>
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<GetAppIcon />}>
-            Download CSV
-          </Button>
+          <CSVLink data={userDetails} headers={headCells} filename="User_details.csv">
+            <Button variant="outlined" color="primary" startIcon={<GetAppIcon />}>
+              Download CSV
+            </Button>
+          </CSVLink>
         </Box>
       </Paper>
       <Paper className={classes.paper}>
@@ -187,7 +187,7 @@ export default function UserDetails() {
                 .map((row, index) => {
                   return (
                     <TableRow hover tabIndex={-1} key={row.id}>
-                      <TableCell>{row.timestamp}</TableCell>
+                      <TableCell>{row.created_at}</TableCell>
                       <TableCell>{row.name}</TableCell>
                       <TableCell>{row.email}</TableCell>
                       <TableCell>{row.mobile}</TableCell>
