@@ -1,4 +1,4 @@
-import { Box, Paper } from '@material-ui/core';
+import { Box, Button, Paper } from '@material-ui/core';
 import AppBar from '@material-ui/core/AppBar';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Divider from '@material-ui/core/Divider';
@@ -17,8 +17,10 @@ import ContactsIcon from '@material-ui/icons/Contacts';
 import MenuIcon from '@material-ui/icons/Menu';
 import OfflineBoltIcon from '@material-ui/icons/OfflineBolt';
 import clsx from 'clsx';
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { NavLink, useHistory } from 'react-router-dom';
+import { logout, saveUser } from '../actions/authActions';
+import { useAuthContext } from '../contexts/AuthContext';
 import AdminRouter from '../routes/AdminRouter';
 
 const drawerWidth = 240;
@@ -41,6 +43,9 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
+  },
+  mainToolbar: {
+    justifyContent: 'space-between',
   },
   menuButton: {
     marginRight: 36,
@@ -88,6 +93,19 @@ export default function AdminDashboard() {
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+  const {
+    loginState: { userToken },
+    loginDispatch,
+  } = useAuthContext();
+  const history = useHistory();
+
+  useEffect(() => {
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      saveUser(loginDispatch, token);
+      history.push('/user_details');
+    } else history.push('/');
+  }, [history, loginDispatch]);
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -101,12 +119,12 @@ export default function AdminDashboard() {
     {
       title: 'User Details',
       icon: <ContactsIcon />,
-      link: '/admin/user_details',
+      link: '/user_details',
     },
     {
       title: 'Coupon Management',
       icon: <OfflineBoltIcon />,
-      link: '/admin/coupon_mgmt',
+      link: '/coupon_mgmt',
     },
   ];
 
@@ -118,60 +136,74 @@ export default function AdminDashboard() {
         className={clsx(classes.appBar, {
           [classes.appBarShift]: open,
         })}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            className={clsx(classes.menuButton, {
-              [classes.hide]: open,
-            })}>
-            <MenuIcon />
-          </IconButton>
+        <Toolbar className={classes.mainToolbar}>
+          {userToken && (
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              className={clsx(classes.menuButton, {
+                [classes.hide]: open,
+              })}>
+              <MenuIcon />
+            </IconButton>
+          )}
           <Typography variant="h6" noWrap>
             Self Trades Admin Panel
           </Typography>
+          {userToken && (
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={() => logout(loginDispatch)}>
+              Logout
+            </Button>
+          )}
         </Toolbar>
       </AppBar>
-      <Drawer
-        variant="permanent"
-        className={clsx(classes.drawer, {
-          [classes.drawerOpen]: open,
-          [classes.drawerClose]: !open,
-        })}
-        classes={{
-          paper: clsx({
+      {userToken && (
+        <Drawer
+          variant="permanent"
+          className={clsx(classes.drawer, {
             [classes.drawerOpen]: open,
             [classes.drawerClose]: !open,
-          }),
-        }}>
-        <div className={classes.toolbar}>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-          </IconButton>
-        </div>
-        <Divider />
-        <List>
-          {listItems.map((item) => (
-            <NavLink to={item.link} key={item.title}>
-              <ListItem button>
-                <ListItemIcon>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText primary={item.title} />
-              </ListItem>
-            </NavLink>
-          ))}
-        </List>
-      </Drawer>
+          })}
+          classes={{
+            paper: clsx({
+              [classes.drawerOpen]: open,
+              [classes.drawerClose]: !open,
+            }),
+          }}>
+          <div className={classes.toolbar}>
+            <IconButton onClick={handleDrawerClose}>
+              {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+            </IconButton>
+          </div>
+          <Divider />
+          <List>
+            {listItems.map((item) => (
+              <NavLink to={item.link} key={item.title}>
+                <ListItem button>
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.title} />
+                </ListItem>
+              </NavLink>
+            ))}
+          </List>
+        </Drawer>
+      )}
       <main className={classes.content}>
         <div className={classes.toolbar} />
         <AdminRouter />
         <Paper>
-          <Box color="#869099" component="footer" p={2} >
+          <Box color="#869099" component="footer" p={2}>
             <strong>
-              Copyright &copy; 2021 <a href="https://selftrades.in" target="blank">Self Trades</a>.
+              Copyright &copy; 2021{' '}
+              <a href="https://selftrades.in" target="blank">
+                Self Trades
+              </a>
+              .
             </strong>{' '}
             All rights reserved.
           </Box>

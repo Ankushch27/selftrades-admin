@@ -7,12 +7,10 @@ export const AuthReducer = (prevState, action) => {
         ...prevState,
         isLoading: false,
         userToken: action.value.token,
-        userData: action.value.userData,
       };
     case actionTypes.LOGOUT:
       return {
         ...prevState,
-        userData: null,
         userToken: null,
         isLoading: false,
       };

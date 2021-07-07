@@ -11,7 +11,6 @@ const AuthContextProvider = (props) => {
   const initialLoginState = {
     isLoading: true,
     userToken: null,
-    userData: null,
   };
 
   const [loginState, loginDispatch] = useReducer(AuthReducer, initialLoginState);

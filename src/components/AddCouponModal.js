@@ -8,13 +8,13 @@ import IconButton from '@material-ui/core/IconButton';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
-import axios from 'axios';
 import { Field, Form, Formik, useField } from 'formik';
 import React, { useContext } from 'react';
 import { addCoupon, updateCoupon } from '../actions/couponsActions';
 import { closeModal } from '../actions/modalActions';
 import { useCouponsContext } from '../contexts/CouponsContext';
 import { ModalContext } from '../contexts/ModalContext';
+import { api } from '../utils/constants';
 import { CouponSchema } from '../utils/ValidationSchema';
 
 const styles = (theme) => ({
@@ -98,7 +98,7 @@ const AddCouponModal = () => {
 
   const addNewCoupon = async ({ active, coupon, discount, module }) => {
     try {
-      let res = await axios.post('/addCoupon', {
+      let res = await api.post('/addCoupon', {
         active,
         coupon,
         discount,
@@ -115,7 +115,7 @@ const AddCouponModal = () => {
   const editCoupon = async ({ active, coupon, discount, module }) => {
     console.log(active, coupon, discount, module)
     try {
-      let res = await axios.patch('/updateCoupon', {
+      let res = await api.patch('/updateCoupon', {
         active,
         coupon,
         discount,
@@ -147,6 +147,7 @@ const AddCouponModal = () => {
                   error={values.errors.coupon ? true : false}
                   name="coupon"
                   as={TextField}
+                  variant="outlined"
                   label="Coupon Name"
                 />
                 <Field
@@ -154,12 +155,14 @@ const AddCouponModal = () => {
                   name="discount"
                   type="number"
                   as={TextField}
+                  variant="outlined"
                   label="Cost %"
                 />
                 <Field
                   error={values.errors.module ? true : false}
                   name="module"
                   as={TextField}
+                  variant="outlined"
                   label="Choose Module"
                   select>
                   <MenuItem value="Select">Select</MenuItem>

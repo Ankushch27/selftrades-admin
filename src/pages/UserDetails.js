@@ -11,10 +11,12 @@ import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Typography from '@material-ui/core/Typography';
 import GetAppIcon from '@material-ui/icons/GetApp';
-import axios from 'axios';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import { CSVLink } from 'react-csv';
+import { Redirect } from 'react-router';
+import { useAuthContext } from '../contexts/AuthContext';
+import { api } from '../utils/constants';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -44,7 +46,7 @@ function stableSort(array, comparator) {
 
 const headCells = [
   { key: 'timestamp', label: 'Timestamp' },
-  { key: 'username', label: 'Username' },
+  { key: 'name', label: 'Username' },
   { key: 'email', label: 'Email' },
   { key: 'mobile', label: 'Mobile' },
   { key: 'module', label: 'Module' },
@@ -121,11 +123,14 @@ export default function UserDetails() {
   const [orderBy, setOrderBy] = useState('timestamp');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const {
+    loginState: { userToken },
+  } = useAuthContext();
 
   useEffect(() => {
     async function fetchData() {
       try {
-        let res = await axios.get('/allUsers', {
+        let res = await api.get('/allUsers', {
           // headers: {
           //   Authorization: `Bearer ${loginState.userToken}`,
           // },
@@ -153,6 +158,8 @@ export default function UserDetails() {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+  if(!userToken) return <Redirect to="/" />
 
   return (
     <div className={classes.root}>

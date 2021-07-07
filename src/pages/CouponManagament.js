@@ -11,16 +11,16 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
-  Typography,
+  Typography
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import DeleteIcon from '@material-ui/icons/Delete';
 import CloseIcon from '@material-ui/icons/Close';
+import DeleteIcon from '@material-ui/icons/Delete';
 import DoneIcon from '@material-ui/icons/Done';
 import EditIcon from '@material-ui/icons/Edit';
-import axios from 'axios';
 import PropTypes from 'prop-types';
 import React, { useContext, useEffect } from 'react';
+import { Redirect } from 'react-router';
 import { loadCoupons } from '../actions/couponsActions';
 import {
   openModal,
@@ -29,11 +29,13 @@ import {
   setCouponId,
   setDiscount,
   setEditMode,
-  setModule,
+  setModule
 } from '../actions/modalActions';
 import NewAddCouponModal from '../components/AddCouponModal';
+import { useAuthContext } from '../contexts/AuthContext';
 import { useCouponsContext } from '../contexts/CouponsContext';
 import { ModalContext } from '../contexts/ModalContext';
+import { api } from '../utils/constants';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -139,6 +141,9 @@ export default function CouponManagament() {
   const [orderBy, setOrderBy] = React.useState('coupon');
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const {
+    loginState: { userToken },
+  } = useAuthContext();
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -168,7 +173,7 @@ export default function CouponManagament() {
 
   const handleDeleteCoupon = async (id) => {
     try {
-      await axios.delete('/deleteCoupon', { data: {id} });
+      await api.delete('/deleteCoupon', { data: {id} });
       let updatedCoupons = couponsState.filter(x => x.id !== id)
       loadCoupons(couponsDispatch, updatedCoupons)
     } catch (error) {
@@ -179,7 +184,7 @@ export default function CouponManagament() {
   useEffect(() => {
     async function fetchData() {
       try {
-        let res = await axios.get('/allCoupons', {
+        let res = await api.get('/allCoupons', {
           // headers: {
           //   Authorization: `Bearer ${loginState.userToken}`,
           // },
@@ -191,6 +196,8 @@ export default function CouponManagament() {
     }
     fetchData();
   }, [couponsDispatch]);
+
+  if(!userToken) return <Redirect to="/" />
 
   return (
     <div className={classes.root}>
